@@ -1,36 +1,25 @@
 #pragma once
 
-#include <string>
+#include "BaseLabel.hpp"
 
-class Label {
-public:
-    virtual std::string getText() const = 0;
-
-    virtual ~Label() = default;
-};
+#include <memory>
 
 class SimpleLabel : public Label {
-    std::string value;
-
 public:
     SimpleLabel(const std::string&);
-
     virtual std::string getText() const override;
-    virtual void setText(const std::string&);
 };
 
 class RichLabel : public Label {
-    std::string value;
+protected:
     std::string color;
     unsigned short fontSize;
     std::string fontName;
-
 public:
     RichLabel(const std::string&, const std::string&,
               unsigned short, const std::string&);
 
     virtual std::string getText() const override;
-    virtual void setText(const std::string&);
 
     virtual std::string getColor() const;
     virtual void setColor(const std::string&);
