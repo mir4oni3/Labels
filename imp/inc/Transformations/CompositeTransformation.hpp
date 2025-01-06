@@ -5,6 +5,7 @@
 class CompositeTransformation : public Transformation {
     std::vector<std::shared_ptr<Transformation>> transformations;
 public:
+    CompositeTransformation() = default;
     CompositeTransformation(const std::vector<std::shared_ptr<Transformation>>&);
 
     const std::vector<std::shared_ptr<Transformation>>& getTransformations() const;
