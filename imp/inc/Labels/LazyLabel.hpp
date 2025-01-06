@@ -8,8 +8,8 @@ const short LAZY_LABEL_TIMEOUT = 5;
 
 class LazyLabel : public Label {
 protected:
-    std::shared_ptr<Label> label;
-    short requestCount = -1;
+    mutable std::shared_ptr<Label> label;
+    mutable short requestCount = -1;
 public:
     LazyLabel(const std::shared_ptr<Label>&);
 

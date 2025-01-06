@@ -20,6 +20,8 @@ public:
 
     std::shared_ptr<BaseDecorator> removeLastDecoration();
     std::shared_ptr<BaseDecorator> removeAtIndex(unsigned int);
+    std::shared_ptr<BaseDecorator> removeType(const std::string&);
+    std::shared_ptr<BaseDecorator> removeSpecific(const std::shared_ptr<BaseDecorator>&);
 
     void pushDecoration(const std::shared_ptr<BaseDecorator>&);
     void insertDecoration(unsigned int, const std::shared_ptr<BaseDecorator>&);
