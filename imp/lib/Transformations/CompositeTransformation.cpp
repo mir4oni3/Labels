@@ -11,7 +11,9 @@ const std::vector<std::shared_ptr<Transformation>>& CompositeTransformation::get
 }
 
 void CompositeTransformation::setTransformations(const std::vector<std::shared_ptr<Transformation>>& transformations) {
-    this->transformations = transformations;
+    for (const auto& transformation : transformations) {
+        pushTransformation(transformation);
+    }
 }
 
 std::string CompositeTransformation::transform(const std::string& text) const {
@@ -23,16 +25,11 @@ std::string CompositeTransformation::transform(const std::string& text) const {
 }
 
 void CompositeTransformation::pushTransformation(const std::shared_ptr<Transformation>& transformation) {
-    transformations.push_back(transformation);
+    insertAt(transformation, transformations.size());
 }
 
 std::shared_ptr<Transformation> CompositeTransformation::popTransformation() {
-    if (transformations.empty()) {
-        throw std::out_of_range("No transformations to pop");
-    }
-    std::shared_ptr<Transformation> result = transformations.back();
-    transformations.pop_back();
-    return result;
+    return popAt(transformations.size() - 1);
 }
 
 std::shared_ptr<Transformation> CompositeTransformation::popAt(unsigned int index) {
@@ -47,6 +44,9 @@ std::shared_ptr<Transformation> CompositeTransformation::popAt(unsigned int inde
 void CompositeTransformation::insertAt(const std::shared_ptr<Transformation>& transformation, unsigned int index) {
     if (index > transformations.size()) {
         throw std::out_of_range("Index out of range");
+    }
+    if (!transformation) {
+        throw std::invalid_argument("Transformation cannot be nullptr");
     }
     transformations.insert(transformations.begin() + index, transformation);
 }
