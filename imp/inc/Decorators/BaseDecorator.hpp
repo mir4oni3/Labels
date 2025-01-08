@@ -6,7 +6,7 @@
 #include <memory>
 
 class BaseDecorator : public Label {
-    int removeRecursively(std::shared_ptr<BaseDecorator>&, int, std::shared_ptr<Label>&) const;
+    int removeRecursively(std::shared_ptr<BaseDecorator>&, unsigned int, std::shared_ptr<Label>&) const;
 
 protected:
     std::shared_ptr<Label> label;
@@ -26,8 +26,7 @@ public:
 
     void removeLastDecoration();
     void removeAtIndex(unsigned int);
-    std::shared_ptr<BaseDecorator> removeType(const std::string&);
-    std::shared_ptr<BaseDecorator> removeSpecific(const std::shared_ptr<BaseDecorator>&);
+    void removeType(const std::shared_ptr<BaseDecorator>&);
 
     void pushDecoration(const std::shared_ptr<BaseDecorator>&);
     void insertDecoration(unsigned int, const std::shared_ptr<BaseDecorator>&);

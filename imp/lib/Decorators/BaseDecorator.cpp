@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <memory>
+#include <typeinfo>
 
 BaseDecorator::BaseDecorator(const std::shared_ptr<Label>& label, const std::shared_ptr<Transformation>& trans) {
     if (!label) {
@@ -58,7 +59,7 @@ void BaseDecorator::removeLastDecoration() {
     this->transformation = result->transformation;
 }
 
-int BaseDecorator::removeRecursively(std::shared_ptr<BaseDecorator>& decorator, int indexRemove, std::shared_ptr<Label>& prev) const {
+int BaseDecorator::removeRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned int indexRemove, std::shared_ptr<Label>& prev) const {
     std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(decorator->label);
 
     if (!under) {
@@ -97,7 +98,38 @@ void BaseDecorator::removeAtIndex(unsigned int index) {
     }
 
     if (index == currentIndex) {
-        this->transformation = under->transformation;
-        this->label = under->label;
+        removeLastDecoration();
     }
+}
+
+void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRemove) {
+    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
+
+    if (!under && typeid(*objTypeToRemove) == typeid(*this)) {
+        throw std::runtime_error(
+            "Tried removal of the single remaining decoration. "
+            "If you want to extract the underlying label, use getUnderlyingLabel() instead."
+        );
+    }
+
+    if (!under) {
+        throw std::logic_error("No matching decoration to remove.");
+    }
+
+    std::shared_ptr<BaseDecorator> current = nullptr;
+
+    while (under) {
+        if (typeid(*under) == typeid(*objTypeToRemove)) {
+            if (current) {
+                current->label = under->label;
+            } else {
+                removeLastDecoration();
+            }
+            return;
+        }
+        current = under;
+        under = std::dynamic_pointer_cast<BaseDecorator>(under->label);
+    }
+
+    throw std::logic_error("No matching decoration to remove.");
 }
