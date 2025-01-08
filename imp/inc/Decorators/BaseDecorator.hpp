@@ -6,8 +6,7 @@
 #include <memory>
 
 class BaseDecorator : public Label {
-    unsigned short layer;
-    void updateLayer(const std::shared_ptr<Label>&);
+    int removeRecursively(std::shared_ptr<BaseDecorator>&, int, std::shared_ptr<Label>&) const;
 
 protected:
     std::shared_ptr<Label> label;

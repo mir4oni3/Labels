@@ -4,22 +4,12 @@
 #include <iostream>
 #include <memory>
 
-void BaseDecorator::updateLayer(const std::shared_ptr<Label>& label) {
- std::shared_ptr<BaseDecorator> labelDecorator = std::dynamic_pointer_cast<BaseDecorator>(label);
-    if (labelDecorator) {
-        this->layer = labelDecorator->layer + 1;
-    } else {
-        this->layer = 0;
-    }
-}
-
 BaseDecorator::BaseDecorator(const std::shared_ptr<Label>& label, const std::shared_ptr<Transformation>& trans) {
     if (!label) {
         throw std::invalid_argument("Label cannot be nullptr");
     }
     this->label = label;
     setTransformation(trans);
-    updateLayer(label);
 }
 
 //NOTE: The returned label could be decorated.
@@ -29,11 +19,11 @@ const std::shared_ptr<Label>& BaseDecorator::getLabel() const {
 
 //Returns the base undecorated label.
 const std::shared_ptr<Label>& BaseDecorator::getUnderlyingLabel() const {
-    if (this->layer == 0) {
+    std::shared_ptr<BaseDecorator> current = std::dynamic_pointer_cast<BaseDecorator>(label);
+    if (!current) {
         return label;
     }
 
-    std::shared_ptr<BaseDecorator> current = std::dynamic_pointer_cast<BaseDecorator>(label);
     while (std::dynamic_pointer_cast<BaseDecorator>(current->label)) {
         current = std::dynamic_pointer_cast<BaseDecorator>(current->label);
     }
@@ -55,63 +45,59 @@ void BaseDecorator::setTransformation(const std::shared_ptr<Transformation>& tra
 
 //To preserve invariants, decorators always need to have at least one decoration.
 void BaseDecorator::removeLastDecoration() {
-    if (this->layer == 0) {
+    std::shared_ptr<BaseDecorator> result = std::dynamic_pointer_cast<BaseDecorator>(label);
+
+    if (!result) {
         throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
         );
     }
-    std::shared_ptr<BaseDecorator> result = std::dynamic_pointer_cast<BaseDecorator>(label);
+    
     this->label = result->label;
     this->transformation = result->transformation;
-    this->layer = result->layer;
+}
+
+int BaseDecorator::removeRecursively(std::shared_ptr<BaseDecorator>& decorator, int indexRemove, std::shared_ptr<Label>& prev) const {
+    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(decorator->label);
+
+    if (!under) {
+        if (indexRemove == 0) {
+            prev = decorator->label;
+        }
+        return 0;
+    }
+
+    int currentIndex = removeRecursively(under, indexRemove, prev) + 1;
+
+    if (currentIndex == indexRemove - 1) {
+        prev = decorator;
+    }
+    if (currentIndex == indexRemove + 1) {
+        decorator->label = prev;
+    }
+
+    return currentIndex;
 }
 
 void BaseDecorator::removeAtIndex(unsigned int index) {
-    if (this->layer == 0) {
+    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
+
+    if (!under) {
         throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
         );
     }
 
-    if (index == this->layer) {
-        removeLastDecoration();
-        return;
+    int currentIndex = removeRecursively(under, index, std::shared_ptr<Label>()) + 1;
+
+    if (index > currentIndex) {
+        throw std::out_of_range("Index out of range");
     }
 
-    if (index > this->layer) {
-        throw std::runtime_error(
-            "Tried removal of a decoration at an index"
-            " greater than the current decorations."
-        );
+    if (index == currentIndex) {
+        this->transformation = under->transformation;
+        this->label = under->label;
     }
-
-    this->layer--;
-
-    //Find the decoration right after the one we want to remove.
-    std::shared_ptr<BaseDecorator> current = std::dynamic_pointer_cast<BaseDecorator>(label);
-    current->layer--;
-    while (current->layer != index) {
-       current = std::dynamic_pointer_cast<BaseDecorator>(current->label);
-       current->layer--;
-    }
-
-    /////////////////////////////////////
-    if (index == 0) {
-        current->label = current->getUnderlyingLabel();
-    }
-
-    for (unsigned int i = 1; i < index; i++) {
-        std::shared_ptr<BaseDecorator> next = std::dynamic_pointer_cast<BaseDecorator>(current->label);
-        if (!next) {
-            std::cout << "WARNING: Tried removal of a decoration at an index, but there are fewer decorations. No action performed. Returning nullptr..." << std::endl;
-            return nullptr;
-        }
-        current = next;
-    }
-
-    std::shared_ptr<BaseDecorator> result = std::dynamic_pointer_cast<BaseDecorator>(current->label);
-    current->label = result->label;
-    return result;
 }
