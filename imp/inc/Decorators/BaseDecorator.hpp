@@ -4,9 +4,11 @@
 #include "CompositeTransformation.hpp"
 
 #include <memory>
+#include <functional>
 
 class BaseDecorator : public Label {
     int removeRecursively(std::shared_ptr<BaseDecorator>&, unsigned int, std::shared_ptr<Label>&) const;
+    void removeDecorator(const std::shared_ptr<BaseDecorator>&, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>&);
 
 protected:
     std::shared_ptr<Label> label;

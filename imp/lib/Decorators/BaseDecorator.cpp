@@ -106,10 +106,14 @@ bool BaseDecorator::operator==(const BaseDecorator& other) const {
     return typeid(*this) == typeid(other) && *label == *other.label && *transformation == *other.transformation;
 }
 
-void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRemove) {
-    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
+void BaseDecorator::removeDecorator(const std::shared_ptr<BaseDecorator>& objToRemove, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>& comp) {
+    if (!objToRemove) {
+        throw std::invalid_argument("Type to remove cannot be nullptr");
+    }
 
-    if (!under && typeid(*objTypeToRemove) == typeid(*this)) {
+    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
+    
+    if (!under && typeid(*objToRemove) == typeid(*this)) {
         throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
@@ -123,7 +127,7 @@ void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRe
     std::shared_ptr<BaseDecorator> current = nullptr;
 
     while (under) {
-        if (typeid(*under) == typeid(*objTypeToRemove)) {
+        if (comp(*under, *objToRemove)) {
             if (current) {
                 current->label = under->label;
             } else {
@@ -136,4 +140,16 @@ void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRe
     }
 
     throw std::logic_error("No matching decoration to remove.");
+}
+
+void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRemove) {
+    removeDecorator(objTypeToRemove, [](const BaseDecorator& a, const BaseDecorator& b) {
+        return typeid(a) == typeid(b);
+    });
+}
+
+void BaseDecorator::removeSpecific(const std::shared_ptr<BaseDecorator>& objToRemove) {
+    removeDecorator(objToRemove, [](const BaseDecorator& a, const BaseDecorator& b) {
+        return a == b;
+    });
 }
