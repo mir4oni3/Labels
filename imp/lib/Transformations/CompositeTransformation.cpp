@@ -58,6 +58,13 @@ std::shared_ptr<Transformation> CompositeTransformation::popAt(unsigned int inde
     return result;
 }
 
+std::shared_ptr<Transformation> CompositeTransformation::peekAt(unsigned int index) {
+    if (index >= transformations.size()) {
+        throw std::out_of_range("Index out of range");
+    }
+    return transformations[index];
+}
+
 void CompositeTransformation::insertAt(const std::shared_ptr<Transformation>& transformation, unsigned int index) {
     if (index > transformations.size()) {
         throw std::out_of_range("Index out of range");

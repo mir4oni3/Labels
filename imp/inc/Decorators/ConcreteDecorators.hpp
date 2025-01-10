@@ -10,13 +10,16 @@ public:
 };
 
 class RandomDecorator : public BaseDecorator {
+    mutable unsigned int current = 0;
+    std::vector<int> order;
 public:
     RandomDecorator(const std::shared_ptr<Label>&, const std::vector<std::shared_ptr<Transformation>>&);
     std::string getText() const override;
+    bool operator==(const BaseDecorator&) const override;
 };
 
 class RepeatingDecorator : public BaseDecorator {
-    unsigned int current = 0;
+    mutable unsigned int current = 0;
 public:
     RepeatingDecorator(const std::shared_ptr<Label>&, const std::vector<std::shared_ptr<Transformation>>&);
     std::string getText() const override;

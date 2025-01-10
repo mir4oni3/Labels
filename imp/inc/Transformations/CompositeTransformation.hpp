@@ -14,9 +14,10 @@ public:
     virtual std::string transform(const std::string&) const override;
 
     bool operator==(const Transformation&) const override;
-    
+
     virtual void pushTransformation(const std::shared_ptr<Transformation>&);
     virtual std::shared_ptr<Transformation> popTransformation();
     virtual std::shared_ptr<Transformation> popAt(unsigned int);
+    virtual std::shared_ptr<Transformation> peekAt(unsigned int);
     virtual void insertAt(const std::shared_ptr<Transformation>&, unsigned int);
 };
