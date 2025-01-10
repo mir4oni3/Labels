@@ -7,7 +7,6 @@
 #include <functional>
 
 class BaseDecorator : public Label {
-    int removeRecursively(std::shared_ptr<BaseDecorator>&, unsigned int, std::shared_ptr<Label>&) const;
     void removeDecorator(const std::shared_ptr<BaseDecorator>&, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>&);
 
 protected:
@@ -21,6 +20,8 @@ public:
     virtual bool operator==(const BaseDecorator&) const;
 
     const std::shared_ptr<Label>& getLabel() const;
+    void setLabel(const std::shared_ptr<Label>&);
+
     const std::shared_ptr<Label>& getUnderlyingLabel() const;
 
     const std::shared_ptr<Transformation>& getTransformation() const;
