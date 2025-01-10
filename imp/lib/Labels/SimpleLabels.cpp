@@ -16,6 +16,16 @@ RichLabel::RichLabel(const std::string& text, const std::string& color,
     this->fontName = name;
 }
 
+bool RichLabel::operator==(const Label& other) {
+    try {
+        const RichLabel& otherRich = dynamic_cast<const RichLabel&>(other);
+        return value == otherRich.value && color == otherRich.color &&
+               fontSize == otherRich.fontSize && fontName == otherRich.fontName;
+    } catch (const std::bad_cast& e) {}
+    
+    return false;
+}
+
 std::string RichLabel::getText() const {
     return "<font color=\"" + color + "\" size=\"" + std::to_string(fontSize) +
            "\" face=\"" + fontName + "\">" + value + "</font>\n";

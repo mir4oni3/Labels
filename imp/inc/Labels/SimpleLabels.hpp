@@ -19,6 +19,8 @@ public:
     RichLabel(const std::string&, const std::string&,
               unsigned short, const std::string&);
 
+    virtual bool operator==(const Label&) override;
+    
     virtual std::string getText() const override;
 
     virtual std::string getColor() const;

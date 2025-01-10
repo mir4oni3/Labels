@@ -102,6 +102,10 @@ void BaseDecorator::removeAtIndex(unsigned int index) {
     }
 }
 
+bool BaseDecorator::operator==(const BaseDecorator& other) const {
+    return typeid(*this) == typeid(other) && *label == *other.label && *transformation == *other.transformation;
+}
+
 void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRemove) {
     std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
 

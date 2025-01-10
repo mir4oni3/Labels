@@ -12,5 +12,7 @@ public:
     const std::string& getTo() const;
     void setTo(const std::string&);
 
+    virtual bool operator==(const Transformation&) const override;
+    
     virtual std::string transform(const std::string&) const override;
 };

@@ -10,6 +10,8 @@ protected:
 public:
     HelpLabel(const std::shared_ptr<Label>&);
 
+    bool operator==(const Label&) override;
+
     virtual std::string getText() const override;
     virtual std::string getHelp() const = 0;
 };

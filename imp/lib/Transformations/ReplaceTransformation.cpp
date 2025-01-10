@@ -26,6 +26,15 @@ void ReplaceTransformation::setTo(const std::string& to) {
     this->to = to;
 }
 
+bool ReplaceTransformation::operator==(const Transformation& other) const {
+    try {
+        const ReplaceTransformation& otherReplace = dynamic_cast<const ReplaceTransformation&>(other);
+        return from == otherReplace.from && to == otherReplace.to;
+    } catch (const std::bad_cast& e) {}
+    
+    return false;
+}
+
 std::string ReplaceTransformation::transform(const std::string& text) const {
     std::string result = text;
     size_t start = 0;

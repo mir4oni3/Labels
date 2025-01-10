@@ -32,6 +32,23 @@ std::shared_ptr<Transformation> CompositeTransformation::popTransformation() {
     return popAt(transformations.size() - 1);
 }
 
+bool CompositeTransformation::operator==(const Transformation& other) const {
+    try {
+        const CompositeTransformation& otherComposite = dynamic_cast<const CompositeTransformation&>(other);
+        if (transformations.size() != otherComposite.transformations.size()) {
+            return false;
+        }
+        for (unsigned int i = 0; i < transformations.size(); i++) {
+            if (*transformations[i] != *otherComposite.transformations[i]) {
+                return false;
+            }
+        }
+        return true;
+    } catch (const std::bad_cast& e) {}
+    
+    return false;
+}
+
 std::shared_ptr<Transformation> CompositeTransformation::popAt(unsigned int index) {
     if (index >= transformations.size()) {
         throw std::out_of_range("Index out of range");

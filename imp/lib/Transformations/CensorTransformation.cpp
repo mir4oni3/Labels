@@ -10,6 +10,15 @@ void CensorTransformation::setCensorWord(const std::string& word) {
     censorWord = word;
 }
 
+bool CensorTransformation::operator==(const Transformation& other) {
+    try {
+        const CensorTransformation& otherCensor = dynamic_cast<const CensorTransformation&>(other);
+        return censorWord == otherCensor.censorWord;
+    } catch (const std::bad_cast& e) {}
+    
+    return false;
+}
+
 std::string CensorTransformation::transform(const std::string& text) const {
     std::string result = text;
     size_t start = 0;

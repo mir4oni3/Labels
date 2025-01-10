@@ -9,5 +9,7 @@ public:
     const std::string& getCensorWord() const;
     void setCensorWord(const std::string&);
 
+    bool operator==(const Transformation&);
+    
     virtual std::string transform(const std::string&) const override;
 };

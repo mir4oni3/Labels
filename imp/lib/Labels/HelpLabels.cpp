@@ -1,6 +1,7 @@
 #include "../../inc/Labels/HelpLabels.hpp"
 
 #include <iostream>
+#include <memory>
 
 HelpLabel::HelpLabel(const std::shared_ptr<Label>& label) {
     if (!label) {
@@ -20,6 +21,15 @@ std::string HelpLengthLabel::getHelp() const {
 }
 
 HelpWordCountLabel::HelpWordCountLabel(const std::shared_ptr<Label>& label) : HelpLabel(label) {}
+
+bool HelpLabel::operator==(const Label& other) {
+    try {
+        const HelpLabel& otherHelp = dynamic_cast<const HelpLabel&>(other);
+        return *label == *otherHelp.label;
+    } catch (const std::bad_cast& e) {}
+    
+    return false;
+}
 
 std::string HelpWordCountLabel::getHelp() const {
     std::string text = label->getText();

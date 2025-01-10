@@ -11,10 +11,12 @@ class BaseDecorator : public Label {
 protected:
     std::shared_ptr<Label> label;
     std::shared_ptr<CompositeTransformation> transformation;
-public:
 
+public:
     BaseDecorator(const std::shared_ptr<Label>&, const std::shared_ptr<Transformation>&);
     virtual ~BaseDecorator() = default;
+
+    virtual bool operator==(const BaseDecorator&) const;
 
     const std::shared_ptr<Label>& getLabel() const;
     const std::shared_ptr<Label>& getUnderlyingLabel() const;
@@ -27,6 +29,7 @@ public:
     void removeLastDecoration();
     void removeAtIndex(unsigned int);
     void removeType(const std::shared_ptr<BaseDecorator>&);
+    void removeSpecific(const std::shared_ptr<BaseDecorator>&);
 
     void pushDecoration(const std::shared_ptr<BaseDecorator>&);
     void insertDecoration(unsigned int, const std::shared_ptr<BaseDecorator>&);
