@@ -132,6 +132,8 @@ std::shared_ptr<BaseDecorator> removeAtIndex(std::shared_ptr<BaseDecorator>& dec
     if (index == currentIndex) {
         decorator = removeLastDecoration(decorator);
     }
+
+    return decorator;
 }
 
 bool BaseDecorator::operator==(const BaseDecorator& other) const {

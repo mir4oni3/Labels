@@ -14,6 +14,10 @@ std::string HelpLabel::getText() const {
     return label->getText();
 }
 
+void HelpLabel::setText(const std::string& text) {
+    label->setText(text);
+}
+
 HelpLengthLabel::HelpLengthLabel(const std::shared_ptr<Label>& label) : HelpLabel(label) {}
 
 std::string HelpLengthLabel::getHelp() const {

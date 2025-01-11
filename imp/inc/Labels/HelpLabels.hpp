@@ -13,6 +13,8 @@ public:
     bool operator==(const Label&) override;
 
     virtual std::string getText() const override;
+    virtual void setText(const std::string&) override;
+
     virtual std::string getHelp() const = 0;
 };
 
