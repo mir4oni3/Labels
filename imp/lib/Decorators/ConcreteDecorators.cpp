@@ -2,7 +2,14 @@
 
 #include <iostream>
 #include <algorithm>
-#include <random>
+
+static void shuffle (std::vector<int>& order) {
+    //seeding is done in main()
+    for (int i = 0; i < order.size() - 1; i++) {
+        int j = rand() % (order.size() - i) + i;
+        std::swap(order[i], order[j]);
+    }
+}
 
 SimpleDecorator::SimpleDecorator(const std::shared_ptr<Label>& label, const std::shared_ptr<Transformation>& transformation) : BaseDecorator(label, transformation) {}
 
@@ -18,7 +25,7 @@ RandomDecorator::RandomDecorator(const std::shared_ptr<Label>& label, const std:
     for (int i = 0; i < transformations.size(); i++) {
         order[i] = i;
     }
-    std::shuffle(order.begin(), order.end(), std::random_device());
+    shuffle(order);
 }
 
 std::string RandomDecorator::getText() const {
@@ -30,7 +37,7 @@ std::string RandomDecorator::getText() const {
     unsigned int index = order[current];
 
     if (++current == order.size()) {
-        std::shuffle(order.begin(), order.end(), std::random_device());
+        shuffle(order);
         current = 0;
     }
 

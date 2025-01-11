@@ -2,6 +2,8 @@
 
 #include "BaseDecorator.hpp"
 
+#include <random>
+
 //will only have one item in the composite transformation
 class SimpleDecorator : public BaseDecorator {
 public:
@@ -12,7 +14,8 @@ public:
 
 class RandomDecorator : public BaseDecorator {
     mutable unsigned int current = 0;
-    std::vector<int> order;
+    mutable std::vector<int> order;
+
 public:
     RandomDecorator(const std::shared_ptr<Label>&, const std::vector<std::shared_ptr<Transformation>>&);
     std::string getText() const override;

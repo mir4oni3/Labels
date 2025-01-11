@@ -11,7 +11,7 @@ file(GLOB_RECURSE TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../tst/Test*.cpp)
 
 add_executable(runTests ${TEST_SOURCES})
 
-target_link_libraries(runTests PRIVATE Catch2::Catch2WithMain ShapesLibrary)
+target_link_libraries(runTests PRIVATE Catch2::Catch2WithMain LabelsLibrary)
 
 include(CTest)
 include(Catch)
