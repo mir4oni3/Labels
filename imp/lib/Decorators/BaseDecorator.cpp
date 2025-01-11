@@ -5,14 +5,9 @@
 #include <memory>
 #include <typeinfo>
 
-static int insertRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned int indexInsert, const std::shared_ptr<BaseDecorator>& toInsert) {
+static int insertRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned int indexInsert, std::shared_ptr<BaseDecorator>& toInsert) {
     std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(decorator->getLabel());
     int currentIndex;
-
-    if (!under && indexInsert == 0) {
-        std::shared_ptr<BaseDecorator> newDec = std::make_shared<BaseDecorator>(decorator->getLabel(), toInsert->getTransformation());
-        decorator->setLabel(newDec);
-    }
 
     if (!under) {
         currentIndex = 0;
@@ -21,12 +16,20 @@ static int insertRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned
         currentIndex = insertRecursively(under, indexInsert, toInsert) + 1;
     }
 
-
-    if (currentIndex == indexInsert - 1) {
-        decorator->pushDecoration(toInsert);
+    if (currentIndex == indexInsert) {
+        toInsert->setLabel(decorator->getLabel());
+        decorator->setLabel(toInsert);
     }
 
     return currentIndex;
+}
+
+std::shared_ptr<BaseDecorator> pushDecoration(std::shared_ptr<BaseDecorator>& decorator, std::shared_ptr<BaseDecorator>& toPush) {
+    if (!decorator || !toPush) {	
+        throw std::invalid_argument("Decoration cannot be nullptr");
+    }
+    toPush->setLabel(decorator);
+    return toPush;
 }
 
 static int removeRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned int indexRemove, std::shared_ptr<Label>& prev) {
@@ -94,39 +97,40 @@ void BaseDecorator::setTransformation(const std::shared_ptr<Transformation>& tra
     this->transformation->pushTransformation(trans);
 }
 
-//To preserve invariants, decorators always need to have at least one decoration.
-void BaseDecorator::removeLastDecoration() {
-    std::shared_ptr<BaseDecorator> result = std::dynamic_pointer_cast<BaseDecorator>(label);
+std::shared_ptr<BaseDecorator> removeLastDecoration(std::shared_ptr<BaseDecorator>& decorator) {
+    std::shared_ptr<BaseDecorator> result = std::dynamic_pointer_cast<BaseDecorator>(decorator->getLabel());
 
     if (!result) {
+        //To preserve invariants, decorators always need to have at least one decoration.
         throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
         );
     }
-    
-    this->label = result->label;
-    this->transformation = result->transformation;
+
+    return result;
 }
 
-void BaseDecorator::removeAtIndex(unsigned int index) {
-    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
+std::shared_ptr<BaseDecorator> removeAtIndex(std::shared_ptr<BaseDecorator>& decorator, unsigned int index) {
+    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(decorator->getLabel());
 
     if (!under) {
+        //To preserve invariants, decorators always need to have at least one decoration.
         throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
         );
     }
 
-    int currentIndex = removeRecursively(under, index, std::shared_ptr<Label>()) + 1;
+    std::shared_ptr<Label> temp = nullptr;
+    int currentIndex = removeRecursively(under, index, temp) + 1;
 
     if (index > currentIndex) {
         throw std::out_of_range("Index out of range");
     }
 
     if (index == currentIndex) {
-        removeLastDecoration();
+        decorator = removeLastDecoration(decorator);
     }
 }
 
@@ -134,87 +138,62 @@ bool BaseDecorator::operator==(const BaseDecorator& other) const {
     return typeid(*this) == typeid(other) && *label == *other.label && *transformation == *other.transformation;
 }
 
-void BaseDecorator::removeDecorator(const std::shared_ptr<BaseDecorator>& objToRemove, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>& comp) {
-    if (!objToRemove) {
-        throw std::invalid_argument("Type to remove cannot be nullptr");
+static std::shared_ptr<BaseDecorator> removeDecorator(std::shared_ptr<BaseDecorator>& removeFrom, const std::shared_ptr<BaseDecorator>& toRemove, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>& comp) {
+    if (!toRemove || !removeFrom) {
+        throw std::invalid_argument("Decorator cannot be nullptr");
     }
 
-    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
+    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(removeFrom->getLabel());
     
-    if (!under && typeid(*objToRemove) == typeid(*this)) {
+    if (!under && comp(*toRemove, *removeFrom)) {
+        //To preserve invariants, decorators always need to have at least one decoration.
         throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
         );
     }
 
-    if (!under) {
-        throw std::logic_error("No matching decoration to remove.");
-    }
-
     std::shared_ptr<BaseDecorator> current = nullptr;
 
     while (under) {
-        if (comp(*under, *objToRemove)) {
+        if (comp(*under, *toRemove)) {
             if (current) {
-                current->label = under->label;
+                current->setLabel(under->getLabel());
             } else {
-                removeLastDecoration();
+                removeFrom = removeLastDecoration(removeFrom);
             }
-            return;
+            return removeFrom;
         }
         current = under;
-        under = std::dynamic_pointer_cast<BaseDecorator>(under->label);
+        under = std::dynamic_pointer_cast<BaseDecorator>(under->getLabel());
     }
 
     throw std::logic_error("No matching decoration to remove.");
+    return nullptr;
 }
 
-void BaseDecorator::removeType(const std::shared_ptr<BaseDecorator>& objTypeToRemove) {
-    removeDecorator(objTypeToRemove, [](const BaseDecorator& a, const BaseDecorator& b) {
+std::shared_ptr<BaseDecorator> removeType(std::shared_ptr<BaseDecorator>& removeFrom, const std::shared_ptr<BaseDecorator>& toRemove) {
+    return removeDecorator(removeFrom, toRemove, [](const BaseDecorator& a, const BaseDecorator& b) {
         return typeid(a) == typeid(b);
     });
 }
 
-void BaseDecorator::removeSpecific(const std::shared_ptr<BaseDecorator>& objToRemove) {
-    removeDecorator(objToRemove, [](const BaseDecorator& a, const BaseDecorator& b) {
+std::shared_ptr<BaseDecorator> removeSpecific(std::shared_ptr<BaseDecorator>& removeFrom, const std::shared_ptr<BaseDecorator>& toRemove) {
+    return removeDecorator(removeFrom, toRemove, [](const BaseDecorator& a, const BaseDecorator& b) {
         return a == b;
     });
 }
 
-void BaseDecorator::pushDecoration(const std::shared_ptr<BaseDecorator>& decorator) {
-    if (!decorator) {
+std::shared_ptr<BaseDecorator> insertDecoration(std::shared_ptr<BaseDecorator>& decorator, unsigned int index, std::shared_ptr<BaseDecorator>& toInsert) {
+    if (!decorator || !toInsert) {
         throw std::invalid_argument("Decoration cannot be nullptr");
     }
 
-    std::shared_ptr<BaseDecorator> newUnder = std::make_shared<BaseDecorator>(label, transformation);
-    label = newUnder;
-    transformation = decorator->transformation;
-}
+    int currentIndex = insertRecursively(decorator, index, toInsert);
 
-void BaseDecorator::insertDecoration(unsigned int index, const std::shared_ptr<BaseDecorator>& decorator) {
-    if (!decorator) {
-        throw std::invalid_argument("Decoration cannot be nullptr");
-    }
-
-    std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(label);
-
-    if (!under) {
-        if (index == 0) {
-            std::shared_ptr<BaseDecorator> newUnder = std::make_shared<BaseDecorator>(label, decorator->getTransformation());
-            label = newUnder;
-            return;
-        } else {
-            throw std::out_of_range("Index out of range");
-        }
-    }
-
-    int currentIndex = insertRecursively(under, index, decorator) + 1;
-
-    if (index == currentIndex) {
-        under->pushDecoration(decorator);
-    }
     if (index > currentIndex) {
         throw std::out_of_range("Index out of range");
     }
+
+    return decorator;
 }

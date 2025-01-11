@@ -10,6 +10,10 @@ std::string SimpleDecorator::getText() const {
     return transformation->transform(label->getText());
 }
 
+std::shared_ptr<BaseDecorator> SimpleDecorator::clone() const {
+    return std::make_shared<SimpleDecorator>(*this);
+}
+
 RandomDecorator::RandomDecorator(const std::shared_ptr<Label>& label, const std::vector<std::shared_ptr<Transformation>>& transformations) : BaseDecorator(label, std::make_shared<CompositeTransformation>(transformations)), order(transformations.size()) {
     for (int i = 0; i < transformations.size(); i++) {
         order[i] = i;
@@ -33,6 +37,10 @@ std::string RandomDecorator::getText() const {
     return transformations[index]->transform(label->getText());
 }
 
+std::shared_ptr<BaseDecorator> RandomDecorator::clone() const {
+    return std::make_shared<RandomDecorator>(*this);
+}
+
 bool RandomDecorator::operator==(const BaseDecorator& other) const {
     try {
         const RandomDecorator& otherRandom = dynamic_cast<const RandomDecorator&>(other);
@@ -54,4 +62,8 @@ std::string RepeatingDecorator::getText() const {
     current = (current + 1) % transformations.size();
 
     return transformations[index]->transform(label->getText());
+}
+
+std::shared_ptr<BaseDecorator> RepeatingDecorator::clone() const {
+    return std::make_shared<RepeatingDecorator>(*this);
 }

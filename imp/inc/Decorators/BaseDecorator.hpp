@@ -1,22 +1,22 @@
 #pragma once
 
-#include "BaseLabel.hpp"
-#include "CompositeTransformation.hpp"
+#include "../Labels/BaseLabel.hpp"
+#include "../Transformations/CompositeTransformation.hpp"
 
 #include <memory>
 #include <functional>
 
 class BaseDecorator : public Label {
-    void removeDecorator(const std::shared_ptr<BaseDecorator>&, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>&);
-
 protected:
     std::shared_ptr<Label> label;
     std::shared_ptr<CompositeTransformation> transformation;
 
 public:
     BaseDecorator(const std::shared_ptr<Label>&, const std::shared_ptr<Transformation>&);
+
     virtual ~BaseDecorator() = default;
 
+    virtual std::shared_ptr<BaseDecorator> clone() const = 0;
     virtual bool operator==(const BaseDecorator&) const;
 
     const std::shared_ptr<Label>& getLabel() const;
@@ -28,12 +28,12 @@ public:
     void setTransformation(const std::shared_ptr<Transformation>&);
 
     virtual std::string getText() const override = 0;
-
-    void removeLastDecoration();
-    void removeAtIndex(unsigned int);
-    void removeType(const std::shared_ptr<BaseDecorator>&);
-    void removeSpecific(const std::shared_ptr<BaseDecorator>&);
-
-    void pushDecoration(const std::shared_ptr<BaseDecorator>&);
-    void insertDecoration(unsigned int, const std::shared_ptr<BaseDecorator>&);
 };
+
+std::shared_ptr<BaseDecorator> removeLastDecoration(std::shared_ptr<BaseDecorator>&);
+std::shared_ptr<BaseDecorator> removeAtIndex(std::shared_ptr<BaseDecorator>&, unsigned int);
+std::shared_ptr<BaseDecorator> removeType(std::shared_ptr<BaseDecorator>&, const std::shared_ptr<BaseDecorator>&);
+std::shared_ptr<BaseDecorator> removeSpecific(std::shared_ptr<BaseDecorator>&, const std::shared_ptr<BaseDecorator>&);
+
+std::shared_ptr<BaseDecorator> pushDecoration(std::shared_ptr<BaseDecorator>&, const std::shared_ptr<BaseDecorator>&);
+std::shared_ptr<BaseDecorator> insertDecoration(std::shared_ptr<BaseDecorator>&, unsigned int, std::shared_ptr<BaseDecorator>&);
