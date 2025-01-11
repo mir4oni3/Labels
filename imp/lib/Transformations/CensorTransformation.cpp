@@ -1,12 +1,19 @@
 #include "../../inc/Transformations/CensorTransformation.hpp"
 
-CensorTransformation::CensorTransformation(const std::string& word) : censorWord(word) {}
+#include <iostream>
+
+CensorTransformation::CensorTransformation(const std::string& word) {
+    setCensorWord(word);
+}
 
 const std::string& CensorTransformation::getCensorWord() const {
     return censorWord;
 }
 
 void CensorTransformation::setCensorWord(const std::string& word) {
+    if (word == "") {
+        throw std::invalid_argument("Censor word cannot be empty");
+    }
     censorWord = word;
 }
 
