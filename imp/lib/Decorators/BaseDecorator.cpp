@@ -54,12 +54,11 @@ static int removeRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned
     return currentIndex;
 }
 
-BaseDecorator::BaseDecorator(const std::shared_ptr<Label>& label, const std::shared_ptr<Transformation>& trans) {
+BaseDecorator::BaseDecorator(const std::shared_ptr<Label>& label) {
     if (!label) {
         throw std::invalid_argument("Label cannot be nullptr");
     }
     this->label = label;
-    setTransformation(trans);
 }
 
 //NOTE: The returned label could be decorated.
@@ -83,18 +82,6 @@ const std::shared_ptr<Label>& BaseDecorator::getUnderlyingLabel() const {
     }
 
     return current->label;
-}
-
-const std::shared_ptr<Transformation>& BaseDecorator::getTransformation() const {
-    return transformation;
-}
-
-void BaseDecorator::setTransformation(const std::shared_ptr<Transformation>& trans) {
-    if (!trans) {
-        throw std::invalid_argument("Transformation cannot be nullptr");
-    }
-    this->transformation = std::make_shared<CompositeTransformation>();
-    this->transformation->pushTransformation(trans);
 }
 
 std::shared_ptr<BaseDecorator> removeLastDecoration(std::shared_ptr<BaseDecorator>& decorator) {
@@ -137,7 +124,7 @@ std::shared_ptr<BaseDecorator> removeAtIndex(std::shared_ptr<BaseDecorator>& dec
 }
 
 bool BaseDecorator::operator==(const BaseDecorator& other) const {
-    return typeid(*this) == typeid(other) && *label == *other.label && *transformation == *other.transformation;
+    return typeid(*this) == typeid(other) && *label == *other.label;
 }
 
 static std::shared_ptr<BaseDecorator> removeDecorator(std::shared_ptr<BaseDecorator>& removeFrom, const std::shared_ptr<BaseDecorator>& toRemove, const std::function<bool(const BaseDecorator&, const BaseDecorator&)>& comp) {

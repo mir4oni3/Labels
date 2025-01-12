@@ -9,23 +9,18 @@
 class BaseDecorator : public Label {
 protected:
     std::shared_ptr<Label> label;
-    std::shared_ptr<CompositeTransformation> transformation;
 
 public:
-    BaseDecorator(const std::shared_ptr<Label>&, const std::shared_ptr<Transformation>&);
+    BaseDecorator(const std::shared_ptr<Label>&);
 
     virtual ~BaseDecorator() = default;
 
-    virtual std::shared_ptr<BaseDecorator> clone() const = 0;
     virtual bool operator==(const BaseDecorator&) const;
 
     const std::shared_ptr<Label>& getLabel() const;
     void setLabel(const std::shared_ptr<Label>&);
 
     const std::shared_ptr<Label>& getUnderlyingLabel() const;
-
-    const std::shared_ptr<Transformation>& getTransformation() const;
-    void setTransformation(const std::shared_ptr<Transformation>&);
 
     virtual std::string getText() const override = 0;
 };
