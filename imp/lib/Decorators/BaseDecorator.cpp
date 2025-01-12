@@ -24,7 +24,7 @@ static int insertRecursively(std::shared_ptr<BaseDecorator>& decorator, unsigned
     return currentIndex;
 }
 
-std::shared_ptr<BaseDecorator> pushDecoration(std::shared_ptr<BaseDecorator>& decorator, std::shared_ptr<BaseDecorator>& toPush) {
+std::shared_ptr<BaseDecorator> pushDecoration(std::shared_ptr<BaseDecorator>& decorator, const std::shared_ptr<BaseDecorator>& toPush) {
     if (!decorator || !toPush) {	
         throw std::invalid_argument("Decoration cannot be nullptr");
     }
@@ -120,6 +120,12 @@ std::shared_ptr<BaseDecorator> removeAtIndex(std::shared_ptr<BaseDecorator>& dec
         decorator = removeLastDecoration(decorator);
     }
 
+    if (index == currentIndex - 1) {
+        //Edge case, if under needs to be removed, handle this manually
+        //due to the change of under's memory address
+        decorator->setLabel(under->getLabel());
+    }
+
     return decorator;
 }
 
@@ -134,23 +140,23 @@ static std::shared_ptr<BaseDecorator> removeDecorator(std::shared_ptr<BaseDecora
 
     std::shared_ptr<BaseDecorator> under = std::dynamic_pointer_cast<BaseDecorator>(removeFrom->getLabel());
     
-    if (!under && comp(*toRemove, *removeFrom)) {
-        //To preserve invariants, decorators always need to have at least one decoration.
-        throw std::runtime_error(
+    if (comp(*toRemove, *removeFrom)) {
+        if (!under) {
+             //To preserve invariants, decorators always need to have at least one decoration.
+            throw std::runtime_error(
             "Tried removal of the single remaining decoration. "
             "If you want to extract the underlying label, use getUnderlyingLabel() instead."
         );
+        } else {
+            return removeLastDecoration(removeFrom);
+        }
     }
 
-    std::shared_ptr<BaseDecorator> current = nullptr;
+    std::shared_ptr<BaseDecorator> current = removeFrom;
 
     while (under) {
         if (comp(*under, *toRemove)) {
-            if (current) {
-                current->setLabel(under->getLabel());
-            } else {
-                removeFrom = removeLastDecoration(removeFrom);
-            }
+            current->setLabel(under->getLabel());
             return removeFrom;
         }
         current = under;
@@ -180,7 +186,10 @@ std::shared_ptr<BaseDecorator> insertDecoration(std::shared_ptr<BaseDecorator>& 
 
     int currentIndex = insertRecursively(decorator, index, toInsert);
 
-    if (index > currentIndex) {
+    if (index == currentIndex + 1) {
+        return pushDecoration(decorator, toInsert);
+    }
+    if (index > currentIndex + 1) {
         throw std::out_of_range("Index out of range");
     }
 
