@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 
-static void shuffle (std::vector<int>& order) {
+static void shuffle(std::vector<int>& order) {
     //seeding is done in main()
     for (int i = 0; i < order.size() - 1; i++) {
         int j = rand() % (order.size() - i) + i;
@@ -71,12 +71,17 @@ const std::vector<std::shared_ptr<Transformation>>& RandomDecorator::getTransfor
 }
 
 void RandomDecorator::setTransformation(const std::vector<std::shared_ptr<Transformation>>& transformations) {
+    if (transformations.size() == 0) {
+        this->transformation = transformations;
+        return;
+    }
+
     for (int i = 0; i < transformations.size(); i++) {
         if (!transformations[i]) {
             throw std::invalid_argument("Transformation cannot be nullptr");
         }
     }
-    current = 0;
+    
     order = std::vector<int>(transformations.size());
     for (int i = 0; i < transformations.size(); i++) {
         order[i] = i;
@@ -95,6 +100,10 @@ const std::vector<std::shared_ptr<Transformation>>& RepeatingDecorator::getTrans
 }
 
 void RepeatingDecorator::setTransformation(const std::vector<std::shared_ptr<Transformation>>& transformations) {
+    if (transformations.size() == 0) {
+        this->transformation = transformations;
+        return;
+    }
     for (int i = 0; i < transformations.size(); i++) {
         if (!transformations[i]) {
             throw std::invalid_argument("Transformation cannot be nullptr");

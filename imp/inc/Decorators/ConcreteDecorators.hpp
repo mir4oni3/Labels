@@ -15,6 +15,7 @@ public:
 };
 
 class RandomDecorator : public BaseDecorator {
+protected:
     std::vector<std::shared_ptr<Transformation>> transformation;
     mutable unsigned int current = 0;
     mutable std::vector<int> order;
@@ -28,6 +29,7 @@ public:
 };
 
 class RepeatingDecorator : public BaseDecorator {
+protected:
     std::vector<std::shared_ptr<Transformation>> transformation;
     mutable unsigned int current = 0;
 public:
