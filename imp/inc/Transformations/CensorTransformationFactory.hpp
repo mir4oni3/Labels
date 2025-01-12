@@ -7,6 +7,7 @@ namespace CensorTransformationFactoryConstants {
 }
 
 class CensorTransformationFactory {
+protected:
     std::unordered_map<std::string, std::shared_ptr<CensorTransformation>> flyweight;
     unsigned int maxLengthToStore = CensorTransformationFactoryConstants::DEFAULT_MAX_LENGTH_TO_STORE;
 public:
