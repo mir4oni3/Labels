@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CensorTransformation.hpp"
 
 #include <unordered_map>
